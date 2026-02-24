@@ -1,11 +1,9 @@
 package service;
 
-import model.Estoque;
-import model.Financeiro;
-import model.Loja;
-import model.Produto;
+import model.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,18 +28,20 @@ public class LojaService {
         if (financeiro.getSaldoTotal().compareTo(valorTotal) < 0) return false;
         financeiro.setSaldoTotal(financeiro.getSaldoTotal().subtract(valorTotal));
         Map<Integer, Produto> produtos = estoque.getProdutos();
+        Produto produtoComprado = new Produto(
+                produto.getNome(),
+                produto.getPreco(),
+                produto.getQuantidade()
+        );
         if (produtos.containsKey(id)) {
-            produtos.put(
-                    id,
-                    new Produto(
-                            produto.getNome(),
-                            produto.getPreco(),
-                            produtos.get(id).getQuantidade() + produto.getQuantidade()
-                    )
-            );
+            produtoComprado.setQuantidade(produtoComprado.getQuantidade() + produtos.get(id).getQuantidade());
+            produtos.put(id, produtoComprado);
         } else {
-            produtos.put(id, new Produto(produto.getNome(), produto.getPreco(), produto.getQuantidade()));
+            produtos.put(id, produtoComprado);
         }
+        List<Compra> compras = loja.getCompras();
+        compras.add(new Compra(produtoComprado));
+        loja.setCompras(compras);
         return true;
     }
 
@@ -53,14 +53,11 @@ public class LojaService {
         Map<Integer, Produto> produtos = estoque.getProdutos();
         if (produtos.containsKey(id)) {
             if (produtos.get(id).getQuantidade() - produto.getQuantidade() < 0) return false;
-            produtos.put(
-                    id,
-                    new Produto(
-                            produto.getNome(),
-                            produto.getPreco(),
-                            produtos.get(id).getQuantidade() - quantidade
-                    )
-            );
+            Produto produtoVendido = new Produto(
+                    produto.getNome(),
+                    produto.getPreco(),
+                    produtos.get(id).getQuantidade() - quantidade);
+            produtos.put(id,produtoVendido);
             BigDecimal saldoAtual = loja.getFinanceiro().getSaldoTotal();
             BigDecimal valorProduto = produto.getPreco().multiply(BigDecimal.valueOf(1.05));
             loja.getFinanceiro().
@@ -69,20 +66,23 @@ public class LojaService {
                                     valorProduto.multiply(BigDecimal.valueOf(produto.getQuantidade()))
                             )
                     );
+            List<Venda> vendas = loja.getVendas();
+            vendas.add(new Venda(produtoVendido));
+            loja.setVendas(vendas);
         } else {
             return false;
         }
         return true;
     }
 
-    public BigDecimal verificarSaldo(){
+    public BigDecimal verificarSaldo() {
         return loja.getFinanceiro().getSaldoTotal();
     }
 
     public void listarTodosOsProdutos() {
         Map<Integer, Produto> produtos = loja.getEstoque().getProdutos();
         System.out.println("================ List de itens atuais ================");
-        if(produtos.isEmpty()) System.out.println("Sem produtos disponíveis");
+        if (produtos.isEmpty()) System.out.println("Sem produtos disponíveis");
         for (int key : produtos.keySet()) {
             Produto produtoAtual = produtos.get(key);
             System.out.println(
