@@ -10,11 +10,12 @@ public class Loja {
     private List<Compra> compras;
     private List<Venda> vendas;
 
-    public Loja(BigDecimal valorInicial) {
+    public Loja() {
         this.estoque = new Estoque();
-        this.financeiro = new Financeiro(valorInicial);
+        this.financeiro = new Financeiro(BigDecimal.valueOf(100));
         this.compras = List.of();
-        this.vendas = List.of();;
+        this.vendas = List.of();
+        ;
     }
 
     public Estoque getEstoque() {
@@ -50,14 +51,14 @@ public class Loja {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Loja loja = (Loja) o;
-        return Objects.equals(estoque, loja.estoque) && Objects.equals(financeiro, loja.financeiro) && Objects.equals(compras, loja.compras) && Objects.equals(vendas, loja.vendas);
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Loja loja = (Loja) object;
+        return Objects.equals(getEstoque(), loja.getEstoque()) && Objects.equals(getFinanceiro(), loja.getFinanceiro()) && Objects.equals(getCompras(), loja.getCompras()) && Objects.equals(getVendas(), loja.getVendas());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(estoque, financeiro, compras, vendas);
+        return Objects.hash(getEstoque(), getFinanceiro(), getCompras(), getVendas());
     }
 }
